@@ -28,6 +28,11 @@ public class Airline {
 
 	@Override
 	public String toString() {
+		return name;
+	}
+
+	/*@Override
+	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("Airline [id=");
 		builder.append(id);
@@ -35,5 +40,7 @@ public class Airline {
 		builder.append(name);
 		builder.append("]");
 		return builder.toString();
-	}
+	}*/
+	
+	
 }

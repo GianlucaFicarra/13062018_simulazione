@@ -1,8 +1,12 @@
 package it.polito.tdp.flightdelays;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
+import it.polito.tdp.flightdelays.db.Tratta;
+import it.polito.tdp.flightdelays.model.Airline;
 import it.polito.tdp.flightdelays.model.Model;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -13,6 +17,7 @@ import javafx.scene.control.TextField;
 
 public class FlightDelaysController {
 
+	private Model model;
     @FXML
     private ResourceBundle resources;
 
@@ -23,7 +28,7 @@ public class FlightDelaysController {
     private TextArea txtResult;
 
     @FXML
-    private ComboBox<?> cmbBoxLineaAerea;
+    private ComboBox<Airline> cmbBoxLineaAerea;
 
     @FXML
     private Button caricaVoliBtn;
@@ -36,7 +41,36 @@ public class FlightDelaysController {
 
     @FXML
     void doCaricaVoli(ActionEvent event) {
+    	
     		System.out.println("Carica voli!");
+    		
+    		//salvo l'anno passato dall'utente
+    		Airline linea = cmbBoxLineaAerea.getValue();
+
+    		//verifico se la stringa anno non sia vuota
+    		if (linea == null) {
+    			txtResult.appendText("Scegliere una linea\n");
+    			return;
+    		}
+    		
+    		//creo un grafo per calcolare i confini
+    		try {
+    			model.createGraph(linea);
+    			
+    		} catch (RuntimeException e) {
+    			e.printStackTrace();
+    			txtResult.appendText("Errore\n");
+    			return;
+    		}
+    		
+    		List<Tratta> list = new ArrayList<>();
+    		list= model.getTrattePeggiori();
+    		
+    		for(Tratta t: list) {
+    			this.txtResult.appendText(String.format("%s", t.toString()));
+    		}
+    		
+    		
     }
 
     @FXML
@@ -55,6 +89,9 @@ public class FlightDelaysController {
     }
     
 	public void setModel(Model model) {
-		// TODO Auto-generated method stub
+	this.model = model;
+			
+			//setto i valori dell tendina
+	       cmbBoxLineaAerea.getItems().addAll(model.getLinee());	
 	}
 }
