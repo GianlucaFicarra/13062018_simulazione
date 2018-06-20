@@ -1,5 +1,4 @@
 package it.polito.tdp.flightdelays.model;
-
 import java.time.LocalDateTime;
 
 public class Flight {
@@ -15,6 +14,8 @@ public class Flight {
 	private int arrivalDelay;
 	private int airTime;
 	private int distance;
+	private Airport origin;
+	private Airport destination;
 	
 	public Flight(int id, String airlineId, int flightNumber, String originAirportId, String destinationAirportId,
 			LocalDateTime scheduledDepartureDate, LocalDateTime arrivalDate, int departureDelay, int arrivalDelay,
@@ -24,6 +25,22 @@ public class Flight {
 		this.flightNumber = flightNumber;
 		this.originAirportId = originAirportId;
 		this.destinationAirportId = destinationAirportId;
+		this.scheduledDepartureDate = scheduledDepartureDate;
+		this.arrivalDate = arrivalDate;
+		this.departureDelay = departureDelay;
+		this.arrivalDelay = arrivalDelay;
+		this.airTime = airTime;
+		this.distance = distance;
+	}
+
+	public Flight(int id, String airlineId, int flightNumber, Airport origin, Airport destination,
+			LocalDateTime scheduledDepartureDate, LocalDateTime arrivalDate, int departureDelay, int arrivalDelay,
+			int airTime, int distance) {
+		this.id = id;
+		this.airlineId = airlineId;
+		this.flightNumber = flightNumber;
+		this.origin = origin;
+		this.destination = destination;
 		this.scheduledDepartureDate = scheduledDepartureDate;
 		this.arrivalDate = arrivalDate;
 		this.departureDelay = departureDelay;
@@ -118,6 +135,16 @@ public class Flight {
 
 	public void setDistance(int distance) {
 		this.distance = distance;
+	}
+
+
+	//ritorno l'oggetto airport
+	public Airport getOrigin() {
+		return origin;
+	}
+
+	public Airport getDestination() {
+		return destination;
 	}
 
 	@Override

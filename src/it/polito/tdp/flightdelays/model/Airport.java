@@ -79,11 +79,20 @@ public class Airport {
 
 	@Override
 	public String toString() {
+		return "Airport [id=" + id + ", name=" + name + "]" + "\n";
+	}
+
+	
+
+	/*@Override
+	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("Airport [name=");
 		builder.append(name);
 		builder.append("]");
 		return builder.toString();
 	}
+	*/
+	
 	
 }
