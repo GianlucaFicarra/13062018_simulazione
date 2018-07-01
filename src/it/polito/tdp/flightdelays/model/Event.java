@@ -1,22 +1,17 @@
 package it.polito.tdp.flightdelays.model;
 
 
-import java.time.LocalDateTime;
-
-public class Event {
+public class Event { //PARTENZA
 	
 	/*HO UN SOLO EVENTO - EVENTO PARTENZA:
 	 * PASSEGGERO PARTE DA UN AEREOPORTO, QUANDO ARRIVA QUESTA SARà LA NUOVA PARTENZA */
 
 	private Passeggero passeggero;
-	private Airport airport;       // aeroporto di destinazione
-	private LocalDateTime data;    // data partenza volo per quell'aereoporto
-	
-	public Event(Passeggero passeggero, Airport airport, LocalDateTime data) {
-		super();
-		this.passeggero = passeggero;
-		this.airport = airport;
-		this.data = data;
+	private Flight flight;       //volo preso verso nuova destinazione dopo certo orario
+
+	public Event(Passeggero p, Flight volo) {
+		this.passeggero=p;
+		this.flight=volo;
 	}
 
 	public Passeggero getPasseggero() {
@@ -27,27 +22,22 @@ public class Event {
 		this.passeggero = passeggero;
 	}
 
-	public Airport getAirport() {
-		return airport;
+	public Flight getFlight() {
+		return flight;
 	}
-
-	public void setAirport(Airport airport) {
-		this.airport = airport;
+	public void setFlight(Flight flight) {
+		this.flight = flight;
 	}
-
-	public LocalDateTime getData() {
-		return data;
-	}
-
-	public void setData(LocalDateTime data) {
-		this.data = data;
-	}
-
+	
+	
+	
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((data == null) ? 0 : data.hashCode());
+		result = prime * result + ((flight == null) ? 0 : flight.hashCode());
+		result = prime * result + ((passeggero == null) ? 0 : passeggero.hashCode());
 		return result;
 	}
 
@@ -60,17 +50,22 @@ public class Event {
 		if (getClass() != obj.getClass())
 			return false;
 		Event other = (Event) obj;
-		if (data == null) {
-			if (other.data != null)
+		if (flight == null) {
+			if (other.flight != null)
 				return false;
-		} else if (!data.equals(other.data))
+		} else if (!flight.equals(other.flight))
+			return false;
+		if (passeggero == null) {
+			if (other.passeggero != null)
+				return false;
+		} else if (!passeggero.equals(other.passeggero))
 			return false;
 		return true;
 	}
-	
+
 	@Override
 	public String toString() {
-		return String.format("%s --- %s --- %s", this.passeggero, this.airport, this.data);
+		return String.format("Passeggero %s ---Volo con destinazione %s", this.passeggero.getPasseggeroId(), this.flight.getDestinationAirportId());
 	}
 	
 	

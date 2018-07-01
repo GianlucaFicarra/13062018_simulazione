@@ -1,6 +1,7 @@
 package it.polito.tdp.flightdelays.db;
 
 import java.sql.Connection;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,6 +18,7 @@ import it.polito.tdp.flightdelays.model.Tratta;
 
 public class FlightDelaysDAO {
 
+	//metodi semplici per prendere tutti i valori
 	public List<Airline> loadAllAirlines() {
 		String sql = "SELECT id, airline from airlines";
 		List<Airline> result = new ArrayList<Airline>();
@@ -96,36 +98,38 @@ public class FlightDelaysDAO {
 	
 	
 	//create: seleziono i vertici (gli aereoporti della mia linea)
-	public List<Airport> getAllAirportsFromAirline(AirportIdMap airportIdMap, Airline linea) {
-		String sql = "select distinct a.id as id, a.airport as airport, a.city as city, a.state as state, a.country as country, a.latitude as lat, a.longitude as lon "+
-			     "from airports as a, flights as f " + 
-				"where f.AIRLINE= ? " +   //la linea è quella passata
+public List<Airport> getAirportFromAirline(Airline airline, AirportIdMap airportMap) {
+		
+		String sql = "select distinct a.id as id, a.airport as airport, a.city as city, a.state as state, a.country as country, a.latitude as lat, a.longitude as lon from airports as a, flights as f " + 
+				"where f.AIRLINE= ? " + 
 				"and (f.ORIGIN_AIRPORT_ID = a.ID or f.DESTINATION_AIRPORT_ID = a.ID)";
-		      //aereoporto per essere nodo deve essere o origine o destinazione della linea
 		
 		List<Airport> result = new ArrayList<Airport>();
 		
 		try {
 			Connection conn = ConnectDB.getConnection();
 			PreparedStatement st = conn.prepareStatement(sql);
-			st.setString(1, linea.getId());
+			st.setString(1, airline.getId());
 			ResultSet rs = st.executeQuery();
 
 			while (rs.next()) {
 				Airport airport = new Airport(rs.getString("id"), rs.getString("airport"), rs.getString("city"),
 						rs.getString("state"), rs.getString("country"), rs.getDouble("lat"), rs.getDouble("lon"));
-				result.add(airportIdMap.get(airport));
+				result.add(airportMap.get(airport));
 			}
-				conn.close();
-				return result;
-			} catch (SQLException e) {
-				e.printStackTrace();
-				throw new RuntimeException();
-			}
-					
+			
+			conn.close();
+			return result;
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.out.println("Errore connessione al database");
+			throw new RuntimeException("Error Connection Database");
+		}
+		
 	}
 	
-	/*
+	//non usato, torna i voli di una linea
 	public List<Flight> getFlightByAirline(Airline linea, AirportIdMap map) {
 		String sql = "	SELECT * " + 
 				"	FROM flights as f " + 
@@ -145,8 +149,6 @@ public class FlightDelaysDAO {
 				
 				if(origine!= null || destinazione!= null) {
 					
-					
-				
 				Flight flight = new Flight(rs.getInt("id"), rs.getString("airline"), rs.getInt("flight_number"),
 						map.get(rs.getString("origin_airport_id")), map.get(rs.getString("destination_airport_id")),
 						rs.getTimestamp("scheduled_dep_date").toLocalDateTime(),
@@ -168,48 +170,75 @@ public class FlightDelaysDAO {
 		}
 	}
 
-	*/
-
-	//carico archi
-	public List<Tratta> getTratte(AirportIdMap map, Airline linea) {
-	
-		String sql = "SELECT DISTINCT avg(ARRIVAL_DELAY) AS media, origin_airport_id, destination_airport_id " + 
-				"FROM flights AS f " + 
-				"WHERE f.AIRLINE=? " + 
-				"GROUP BY origin_airport_id, destination_airport_id ";
-		
-		List<Tratta> list = new ArrayList<>();
+	//torna il ritardo di una tratta
+	public double getRitardoMedioSuTratta(Airline airline, Airport source, Airport destination) {
+		String sql = "SELECT AVG(ARRIVAL_DELAY) as media " + 
+				"from flights " + 
+				"where airline= ? " + 
+				"and origin_airport_id = ? " + 
+				"and destination_airport_id = ?";
 		
 		try {
 			Connection conn = ConnectDB.getConnection();
 			PreparedStatement st = conn.prepareStatement(sql);
-			st.setString(1, linea.getId());
+			st.setString(1, airline.getId());
+			st.setString(2, source.getId());
+			st.setString(3, destination.getId());
 			ResultSet rs = st.executeQuery();
-
-			
-			while (rs.next()) {
-				
-				Airport origine=  map.get(rs.getString("origin_airport_id"));
-				Airport destinazione= map.get(rs.getString("destination_airport_id"));
-				
-				if(origine!= null || destinazione!= null) {
-					
-				Tratta tratta= new Tratta(rs.getDouble("media"), origine, destinazione);
-				list.add(tratta); //alla lista inserisco oggetto già presente o appena aggiunta nell'idmap
-				}
-				
-				
+			double media=0.0;
+			if (rs.next()) {
+				media = rs.getDouble("media");
 			}
+
 			conn.close();
-			return list;
-			
+			return media;
+
 		} catch (SQLException e) {
 			e.printStackTrace();
-			throw new RuntimeException();
+			System.out.println("Errore connessione al database");
+			throw new RuntimeException("Error Connection Database");
 		}
+		
 	}
 
-	 //trova primo volo dopo data passata, da questo aereoporto, verso aereoporto della linea
+	//carico archi, ho bisogno dell'oggetto aereoporto quindi uso mappa
+	public List<Tratta> getRitardoMedioSuTratte(Airline airline, AirportIdMap airportMap) {
+		String sql = "SELECT AVG(ARRIVAL_DELAY) as media, origin_airport_id as o, destination_airport_id as d " + 
+				"from flights " + 
+				"where airline= ? " + 
+				"group by origin_airport_id, destination_airport_id";
+		List<Tratta> result = new LinkedList<>();
+	
+		try {
+			Connection conn = ConnectDB.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setString(1, airline.getId());
+			ResultSet rs = st.executeQuery();
+		
+			double media=0.0;
+			while (rs.next()) {
+				
+				media = rs.getDouble("media");
+				Airport origin = airportMap.get(rs.getString("o"));
+				Airport destination = airportMap.get(rs.getString("d"));
+				
+				if(origin != null && destination != null)
+					result.add(new Tratta(origin, destination, media));
+			}
+	
+			conn.close();
+			return result;
+	
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.out.println("Errore connessione al database");
+			throw new RuntimeException("Error Connection Database");
+		}
+		
+	}
+
+//CHIAMATO DA SIMULATORE
+	//trova primo volo dopo data passata, da questo aereoporto, verso aereoporto della linea
 	public Flight findFirstFlight(Airline linea, String idPartenza, LocalDateTime dataPartenza) {
 		String sql = "SELECT * " + 
 			 	 "FROM flights " + 
@@ -247,6 +276,57 @@ public class FlightDelaysDAO {
 	}
 	}
 
+	//non usato, trova la prima data disponibile dopo una passata
+	public LocalDateTime findFirstDate(Airport airport, LocalDateTime data) {
+		String sql = "select SCHEDULED_DEP_DATE as partenza " + 
+				"from flights where ORIGIN_AIRPORT_ID = ? " + 
+				"and SCHEDULED_DEP_DATE > ? " + 
+				"order by SCHEDULED_DEP_DATE asc " + 
+				"LIMIT 1";
+		try {
+			Connection conn = ConnectDB.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setString(1, airport.getId());
+			st.setString(2, data.toString());
+			ResultSet rs = st.executeQuery();
+			LocalDateTime partenza = null;
+			if (rs.next()) {
+				partenza = rs.getTimestamp("partenza").toLocalDateTime();
+			}
+
+			conn.close();
+			return partenza;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.out.println("Errore connessione al database");
+			throw new RuntimeException("Error Connection Database");
+		}
+		
+	}
 	
+	
+	//linee con le mappe
+	public List<Airline> getAllAirlines(AirlineIdMap airlineIdMap) {
+		String sql = "SELECT * FROM airlines ";
+		List<Airline> list = new ArrayList<>();
+		try {
+			Connection conn = ConnectDB.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			ResultSet res = st.executeQuery();
+
+			while (res.next()) {
+				Airline airline = new Airline(res.getString("Airline_ID"), res.getString("Name"));
+				list.add(airlineIdMap.get(airline));//alla lista inserisco oggetto già presente o appena aggiunta nell'idmap
+			}
+			conn.close();
+			return list;
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		}
+	}
+
 	
 }

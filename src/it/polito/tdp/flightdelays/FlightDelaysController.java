@@ -56,7 +56,8 @@ public class FlightDelaysController {
     
     @FXML
     void doCaricaVoli(ActionEvent event) {
-    		
+    	txtResult.clear();
+    	
     		//salvo linea passato dall'utente
     		Airline linea = cmbBoxLineaAerea.getValue();
 
@@ -72,30 +73,43 @@ public class FlightDelaysController {
     		    btnSimula.setDisable(false); //lo attivo
 	    			
 	    			
-	    		List<Tratta> list = new ArrayList<>();
-	    		list= model.getTrattePeggiori();
+	    		List<Tratta> list = model.getTrattePeggiori();
 	    		
 	    		if(list == null) {
 	        		txtResult.setText("Nessuna rotta trovata.");
 	        		return;
 	        	}
 	    		
-	    		txtResult.appendText("\nStampo le tratte peggiori: \n");
+	    		txtResult.appendText("\nStampo le 10 tratte peggiori: \n");
 	    		int cont=1;
 	    		for(Tratta t: list) {
-	    			this.txtResult.appendText(String.format("%d %s\n", cont, t.toString()));
+	    			this.txtResult.appendText(String.format(cont+" Peso:"+ t.getPeso()+" Rotta: "+t.toString()));
 	    			cont++;
 	    		}
 	    		this.txtResult.appendText("\n\n");
 	    			
-    			
+	    		
+    			//PUNTI AGGIUNTI PER AVERE PIù CASISTICHE:
+	    		//1 COMPONENTI CONNESSE DA AEREOPORTO CASUALE
+	    		model.getComponenteConnessa();
+	    		//2 GRAFO FORTEMENTE CONNESSO?
+	    		System.out.println("\nNel grafo ottenuto è possibile da ogni aeroporto raggiungere ogni altro aeroporto?");	
+				if(model.isStronglyConnected()==true) {
+					System.out.println("Tutti gli aereoporti sono raggiungibili (AB BA)");	
+				} else {
+					System.out.println("Non tutti gli aereoporti sono raggiungibili (AB ma non BA)");	
+				}
+	    		//3 CAMMINO MINIMO TRA DUE AEREOPORTI CASUALI
+	    		model.getShortestPath();
+	    		//4 VISITA IN PROFONDITA: nodo più distante da un casuale
+	    		model.getpiuDistante();
+    		
+    		
     		} catch (RuntimeException e) {
     			e.printStackTrace();
     			txtResult.appendText("Errore\n");
     			return;
     		}
-    		
-    		
   
     }
 

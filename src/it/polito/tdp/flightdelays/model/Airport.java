@@ -21,6 +21,8 @@ public class Airport {
 		this.longitude = longitude;
 	}
 
+
+
 	public String getId() {
 		return id;
 	}

@@ -1,60 +1,37 @@
 package it.polito.tdp.flightdelays.model;
 
-import java.util.Comparator;
-
-import it.polito.tdp.flightdelays.model.Airport;
-
-public class Tratta implements Comparable<Tratta> {
-
-	private double peso;
-	private Airport origine;
+public class Tratta implements Comparable<Tratta>{
+	
+	private Airport source;
 	private Airport destination;
+	private double media;
+	private double peso;
 	
-	//valori per calcolare peso: media/distanza
-	private double distanza;
-	private double avg;
-
 	
-	public Tratta(double peso, Airport origine, Airport destination) {
+	public Tratta(Airport source, Airport destination, double media) {
 		super();
-		this.peso = peso;
-		this.origine = origine;
+		this.source = source;
 		this.destination = destination;
+		this.media = media;
 	}
-	
-	
-	public double getAvg() {
-		return avg;
+	public Airport getSource() {
+		return source;
 	}
-	public void setAvg(double avg) {
-		this.avg = avg;
+	public void setSource(Airport source) {
+		this.source = source;
 	}
-	
-	
-	public Airport getOrigine() {
-		return origine;
-	}
-	public void setOrigine(Airport origine) {
-		this.origine = origine;
-	}
-	
-	
 	public Airport getDestination() {
 		return destination;
 	}
 	public void setDestination(Airport destination) {
 		this.destination = destination;
 	}
-
-
-	public double getDistanza() {
-		return distanza;
+	public double getMedia() {
+		return media;
 	}
-	public void setDistanza(double distanza) {
-		this.distanza = distanza;
+	public void setMedia(double media) {
+		this.media = media;
 	}
-
-
 	public double getPeso() {
 		return peso;
 	}
@@ -72,12 +49,8 @@ public class Tratta implements Comparable<Tratta> {
 
 	@Override
 	public String toString() {
-		return "Origine=" + origine + "- Destination=" + destination;
+		return "Origine=" + source + "- Destination=" + destination;
 	}
-	
-	
-	
-	
 	
 	
 }
